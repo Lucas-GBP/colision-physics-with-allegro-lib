@@ -1,5 +1,5 @@
 CC := gcc
-SOURCE_FILES := src\main.c src\libs\physics.c src\libs\render.c
+SOURCE_FILES := src\main.c src\libs\physics.c src\libs\render.c src\libs\vectors.c
 O_FILES := $(subst src\,build\,$(SOURCE_FILES:.c=.o))
 TARGET := executable.exe
 WARNINGS := -Wall -Wextra -Wshadow -Wconversion

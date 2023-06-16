@@ -22,6 +22,18 @@ int main(){
         objects[i] = random_object(WIDTH, HEIGHT, Circle);
     }
 
+    solid_object obj = {
+        .position = {WIDTH/2-50,HEIGHT/2-50},
+        .velocity = {0,0},
+        .axie_velocity = 0,
+        .colision_reaction = NULL,
+        .mass = 1,
+        .shape_type = Circle,
+        .circle = {
+            .radius = 50
+        }
+    };
+
     al_start_timer(timer);
     double old_time = al_get_time();
     int fps_counter = 0;
@@ -38,6 +50,7 @@ int main(){
         if(redraw && al_is_event_queue_empty(queue)){
             al_clear_to_color(al_map_rgb(0, 0, 0));
 
+            draw_object(&obj, al_map_rgb(255, 255, 255));
             update_physics(objects, QUANT, WIDTH, HEIGHT);
             for(int i = 0; i < QUANT; i++){
                 draw_object(objects[i], al_map_rgb(0, 255, 255));

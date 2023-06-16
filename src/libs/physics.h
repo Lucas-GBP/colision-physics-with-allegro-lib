@@ -46,7 +46,6 @@ solid_object* create_solid_object(
     union shapes shape
 );
 void destroy_solid_object(solid_object* object);
-solid_object* copy_solid_object(solid_object* object);
 solid_object* random_object(int32_t width, int32_t height, enum shape_types shape_type);
 void generic_colision_reaction(solid_object* object);
 void print_solid_object(solid_object* object);

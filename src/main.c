@@ -2,6 +2,8 @@
 
 #define QUANT 5000
 
+vector_2d_int mouse;
+
 int main(){
     inicialization();
 
@@ -11,6 +13,7 @@ int main(){
     ALLEGRO_FONT* font = al_create_builtin_font();
 
     al_register_event_source(queue, al_get_keyboard_event_source());
+    al_register_event_source(queue, al_get_mouse_event_source());
     al_register_event_source(queue, al_get_display_event_source(disp));
     al_register_event_source(queue, al_get_timer_event_source(timer));
 
@@ -22,41 +25,39 @@ int main(){
         objects[i] = random_object(WIDTH, HEIGHT, Circle);
     }
 
-    solid_object obj = {
-        .position = {WIDTH/2-50,HEIGHT/2-50},
-        .velocity = {0,0},
-        .axie_velocity = 0,
-        .colision_reaction = NULL,
-        .mass = 1,
-        .shape_type = Circle,
-        .circle = {
-            .radius = 50
-        }
-    };
+    int fps_counter = 0;
+    double fps = 0;
 
     al_start_timer(timer);
     double old_time = al_get_time();
-    int fps_counter = 0;
-    double fps = 0;
     while(true){
         al_wait_for_event(queue, &event);
 
-        if(event.type == ALLEGRO_EVENT_TIMER){
-            redraw = true;
-        } else if((event.type == ALLEGRO_EVENT_KEY_DOWN) || (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)){
+        if(event.type == ALLEGRO_EVENT_DISPLAY_CLOSE){
             break;
+        }
+
+        switch (event.type){
+            case ALLEGRO_EVENT_TIMER:
+                redraw = true;
+                break;
+            case ALLEGRO_EVENT_MOUSE_AXES:
+                mouse.x = event.mouse.x;
+                mouse.y = event.mouse.y;
+                break;
         }
 
         if(redraw && al_is_event_queue_empty(queue)){
             al_clear_to_color(al_map_rgb(0, 0, 0));
 
-            draw_object(&obj, al_map_rgb(255, 255, 255));
             update_physics(objects, QUANT, WIDTH, HEIGHT);
             for(int i = 0; i < QUANT; i++){
                 draw_object(objects[i], al_map_rgb(0, 255, 255));
             }
 
             al_draw_textf(font, al_map_rgb(255, 255, 255), 5, 5, ALLEGRO_ALIGN_LEFT, "%lf", fps);
+            vector_2d_int p = {0,0};
+            draw_button(&p, &mouse, 50, 50);
             al_flip_display();
 
             //FPS Count
@@ -87,6 +88,7 @@ int main(){
 void inicialization(){
     srand((unsigned int)time(NULL));
     al_init();
+    al_install_mouse();
     al_install_keyboard();
     al_init_primitives_addon();
 }

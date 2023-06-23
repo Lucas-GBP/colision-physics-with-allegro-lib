@@ -1,6 +1,6 @@
 #include "main.h"
 
-#define QUANT 5000
+#define QUANT 1000
 
 vector_2d_int mouse;
 
@@ -19,6 +19,53 @@ int main(){
 
     bool redraw = true;
     ALLEGRO_EVENT event;
+
+    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
+    ALLEGRO_COLOR blue = al_map_rgb(0, 0, 255);
+    ALLEGRO_COLOR green = al_map_rgb(255, 0, 0);
+
+    interactable_ui ui_elements[] = {
+        {
+            .type = Button,
+            .button = {
+                .state = Standbye,
+                .arguments = 0,
+                .function = 0,
+                .position = {
+                    .x = 0,
+                    .y = 60
+                },
+                .width = 50,
+                .height = 50,
+                .color = {
+                    white,
+                    blue,
+                    green
+                }
+                
+            }
+        },
+        {
+            .type = Button,
+            .button = {
+                .state = Standbye,
+                .arguments = 0,
+                .function = 0,
+                .position = {
+                    .x = 60,
+                    .y = 60
+                },
+                .width = 50,
+                .height = 50,
+                .color = {
+                    white,
+                    blue,
+                    green
+                }
+                
+            }
+        }
+    };
 
     solid_object* objects[QUANT];
     for(uint64_t i = 0; i < QUANT; i++){
@@ -55,10 +102,9 @@ int main(){
                 draw_object(objects[i], al_map_rgb(0, 255, 255));
             }
 
-            al_draw_textf(font, al_map_rgb(255, 255, 255), 5, 5, ALLEGRO_ALIGN_LEFT, "%lf", fps);
+
             vector_2d_int p = {0,0};
-            draw_button(&p, &mouse, 50, 50);
-            al_flip_display();
+            al_draw_textf(font, al_map_rgb(255, 255, 255), 5, 5, ALLEGRO_ALIGN_LEFT, "%lf", fps);
 
             //FPS Count
             fps_counter++;
@@ -69,6 +115,9 @@ int main(){
                 fps_counter = 0;
             }
 
+            draw_ui(ui_elements, 2);
+
+            al_flip_display();
             redraw = false;
         }
     }

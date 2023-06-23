@@ -21,21 +21,27 @@ void draw_object(solid_object* object, ALLEGRO_COLOR color){
     }
 }
 
-void draw_button(vector_2d_int* position, vector_2d_int* mouse, int width, int height){
-    ALLEGRO_COLOR color;
-    if(mouse->x >= position->x && mouse->y >= position->y &&
-        mouse->x <= position->x+width && mouse->y <= position->y+height
-    ){
-        color = al_map_rgb(255, 255, 255);
-    } else {
-        color = al_map_rgb(0, 255, 0);
+void draw_ui_element(interactable_ui* obj){
+    switch (obj->type){
+    case Button:
+        printf("%p\n", obj);
+        printf("%f %f %f %f\n", (float)obj->button.position.x,
+            (float)obj->button.position.y,
+            obj->button.width,
+            obj->button.height);
+        al_draw_filled_rectangle(
+            (float)obj->button.position.x,
+            (float)obj->button.position.y,
+            (float)obj->button.position.x+obj->button.width,
+            (float)obj->button.position.y+obj->button.height,
+            obj->button.color[obj->button.state]
+        );
+        return;
     }
+}
 
-    al_draw_filled_rectangle(
-        position->x,
-        position->y,
-        width,
-        height,
-        color
-    );
+void draw_ui(interactable_ui obj[], unsigned int quant){
+    for(unsigned int i = 0; i < quant; i++){
+        draw_ui_element(obj+i);
+    }
 }

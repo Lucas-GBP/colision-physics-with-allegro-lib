@@ -1,6 +1,8 @@
 #include "main.h"
 
-#define SOLID_OBJ_QUANT 1000
+#define SOLID_OBJ_QUANT 5000
+#define DEBUG
+#define FPS_LIST_QUANT 100
 
 int main(){
     inicialization();
@@ -36,6 +38,8 @@ int main(){
     double old_time = al_get_time();
     int fps_counter = 0;
     double fps = 0;
+    uint8_t fps_list[FPS_LIST_QUANT] = {0};
+
     bool redraw = true;
     bool loop = true;
 
@@ -88,19 +92,56 @@ int main(){
             for(int i = 0; i < SOLID_OBJ_QUANT; i++){
                 draw_object(objects[i], al_map_rgb(0, 255, 255));
             }
-            //FPS
-            al_draw_textf(font, al_map_rgb(255, 255, 255), 5, 5, ALLEGRO_ALIGN_LEFT, "%lf", fps);
-            // Mouse position
-            al_draw_textf(
-                font, 
-                al_map_rgb(255, 255, 255), 
-                (float)(mouse.x+20), 
-                (float)(mouse.y+20), 
-                ALLEGRO_ALIGN_LEFT,
-                "%i  %i",
-                mouse.x, mouse.y
-            );
 
+            #ifdef DEBUG
+            {
+                //FPS
+                al_draw_textf(font, al_map_rgb(255, 255, 255), 5, 5, ALLEGRO_ALIGN_LEFT, "%lf", fps);
+                //FPS grath
+                const int gx = 5;
+                const int gy = 35;
+                const int gw = 100;
+                const int gh = 65;
+                al_draw_line((float)gx, (float)gy, (float)gx, (float)(gy+gh), al_map_rgb(255, 255, 255), 1);
+                al_draw_line((float)gx, (float)(gy+gh), (float)(gx+gw), (float)(gy+gh), al_map_rgb(255, 255, 255), 1);
+                for(int i = 0; i < FPS_LIST_QUANT-1; i++){
+                    al_draw_line(
+                        (float)(gx+i),
+                        (float)(gy+gh-fps_list[i]),
+                        (float)(gx+1+i),
+                        (float)(gy+gh-fps_list[i+1]),
+                        al_map_rgb(255, 55, 255),
+                        1
+                    );
+                }
+                // Mouse position
+                al_draw_textf(
+                    font, 
+                    al_map_rgb(255, 255, 255), 
+                    (float)(mouse.x+20), 
+                    (float)(mouse.y+20), 
+                    ALLEGRO_ALIGN_LEFT,
+                    "%i  %i",
+                    mouse.x, mouse.y
+                );
+                // mouse buttons
+                int b = 0;
+                for(int i = 0; i < 3; i++){
+                    if(pressed_mouse[i]){
+                        int mx = mouse.x+20;
+                        int my = mouse.y+5;
+                        al_draw_filled_rectangle(
+                            (float)(mx+10*b),
+                            (float)(my),
+                            (float)(mx+(b+1)*10),
+                            (float)(my+10),
+                            al_map_rgb(255, 255, 255)
+                        );
+                        b++;
+                    }
+                }
+            }
+            #endif
             //Draw buffer on the screen
             al_flip_display();
 
@@ -111,6 +152,11 @@ int main(){
                 fps = fps_counter/(new_time - old_time);
                 old_time = new_time;
                 fps_counter = 0;
+
+                for(int i = 0; i < FPS_LIST_QUANT-1; i++){
+                    fps_list[i] = fps_list[i+1];
+                }
+                fps_list[FPS_LIST_QUANT-1] = (uint8_t)fps;
             }
 
             //restar counting

@@ -32,6 +32,8 @@ struct interactable_ui{
 };typedef struct interactable_ui interactable_ui;
 
 
+#define FPS_SAMPLE 3
+
 void draw_object(solid_object* object, ALLEGRO_COLOR color);
 void draw_ui_element(interactable_ui* obj);
 void draw_ui(interactable_ui obj[], unsigned int quant);

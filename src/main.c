@@ -1,11 +1,5 @@
 #include "main.h"
 
-#define SOLID_OBJ_QUANT 1000
-#define DEBUG
-#define FPS_LIST_QUANT 100
-
-void changeStateButton(button* b);
-
 int main(){
     inicialization();
 
@@ -51,9 +45,25 @@ int main(){
             .functionHover = NULL,
         }
     };
+    interactable_ui testButtonS = {
+        .type = Button,
+        .isHover = isHoverButton,
+        .button = {
+            .width = 50,
+            .height = 50,
+            .position = {.x = ((WIDTH-50)/2)+50, .y = (HEIGHT-50)/2},
+            .label = "A Button",
+            .state = Standbye,
+            .color = al_map_rgb(255, 255, 0),
+            .arguments = NULL,
+            .funtionClick = changeStateButton,
+            .functionHover = NULL,
+        }
+    };
 
-    interactable_ui* uiElements[1] = {0};
-    uiElements[0] = &testButton;
+    interactable_ui* uiElements[UI_OBJ_QUANT] = {
+        &testButton, &testButtonS
+    };
 
     // Loop variables
     al_start_timer(timer);
@@ -104,9 +114,19 @@ int main(){
 
         // Update ui elements
         if(uiUpdate){
-            if(uiElements[0]->isHover(uiElements[0], &mouse) && pressed_mouse[1]){
-                uiElements[0]->button.funtionClick(&uiElements[0]->button);
+            for(int i = 0; i < UI_OBJ_QUANT; i++){
+                if(uiElements[i]->isHover(uiElements[i], &mouse)){
+                    switch (uiElements[i]->type){
+                    case Button:
+                        if(pressed_mouse[1]){
+                            uiElements[i]->button.funtionClick(&uiElements[i]->button);
+                            pressed_mouse[1] = false;
+                        }
+                        break;
+                    }
+                }
             }
+
             uiUpdate = false;
         }
 
@@ -127,7 +147,7 @@ int main(){
                 draw_object(objects[i], al_map_rgb(0, 255, 255));
             }
             // UI Elements
-                draw_ui(uiElements, 1);
+            draw_ui(uiElements, UI_OBJ_QUANT);
 
             #ifdef DEBUG
             {
@@ -161,19 +181,17 @@ int main(){
                     mouse.x, mouse.y
                 );
                 // mouse buttons
-                int b = 0;
                 for(int i = 0; i < 3; i++){
                     if(pressed_mouse[i]){
                         int mx = mouse.x+20;
                         int my = mouse.y+5;
                         al_draw_filled_rectangle(
-                            (float)(mx+10*b),
+                            (float)(mx+10*i),
                             (float)(my),
-                            (float)(mx+(b+1)*10),
+                            (float)(mx+(i+1)*10),
                             (float)(my+10),
                             al_map_rgb(255, 255, 255)
                         );
-                        b++;
                     }
                 }
             }

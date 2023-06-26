@@ -1,10 +1,10 @@
 #include "main.h"
 
-#define SOLID_OBJ_QUANT 5000
+#define SOLID_OBJ_QUANT 1000
 #define DEBUG
 #define FPS_LIST_QUANT 100
 
-vector_2d_int mouse;
+void changeStateButton(button* b);
 
 int main(){
     inicialization();
@@ -29,11 +29,31 @@ int main(){
     mouse.x = 0;
     mouse.y = 0;
 
-    // Alocanting physical objects
+    // Alocating physical objects
     solid_object* objects[SOLID_OBJ_QUANT];
     for(uint64_t i = 0; i < SOLID_OBJ_QUANT; i++){
         objects[i] = random_object(WIDTH, HEIGHT, Circle);
     }
+
+    // Alocating Ui Elements
+    interactable_ui testButton = {
+        .type = Button,
+        .isHover = isHoverButton,
+        .button = {
+            .width = 50,
+            .height = 50,
+            .position = {.x = (WIDTH-50)/2, .y = (HEIGHT-50)/2},
+            .label = "A Button",
+            .state = Standbye,
+            .color = al_map_rgb(255, 255, 0),
+            .arguments = NULL,
+            .funtionClick = changeStateButton,
+            .functionHover = NULL,
+        }
+    };
+
+    interactable_ui* uiElements[1] = {0};
+    uiElements[0] = &testButton;
 
     // Loop variables
     al_start_timer(timer);
@@ -43,6 +63,7 @@ int main(){
     uint8_t fps_list[FPS_LIST_QUANT] = {0};
 
     bool redraw = true;
+    bool uiUpdate = false;
     bool loop = true;
 
     while(loop){
@@ -62,20 +83,31 @@ int main(){
             break;
         case ALLEGRO_EVENT_MOUSE_AXES:
             mouse = event.mouse;
+            uiUpdate = true;
             break;
         case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
             mouse = event.mouse;
             if(event.mouse.button < 3)
                 pressed_mouse[event.mouse.button] = true;
+            uiUpdate = true;
             break;
         case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
             mouse = event.mouse;
             if(event.mouse.button < 3)
                 pressed_mouse[event.mouse.button] = false;
+            uiUpdate = true;
             break;
         case ALLEGRO_EVENT_TIMER:
             redraw = true;
             break;
+        }
+
+        // Update ui elements
+        if(uiUpdate){
+            if(uiElements[0]->isHover(uiElements[0], &mouse) && pressed_mouse[1]){
+                uiElements[0]->button.funtionClick(&uiElements[0]->button);
+            }
+            uiUpdate = false;
         }
 
         // Executed each time event when as the last event
@@ -94,6 +126,8 @@ int main(){
             for(int i = 0; i < SOLID_OBJ_QUANT; i++){
                 draw_object(objects[i], al_map_rgb(0, 255, 255));
             }
+            // UI Elements
+                draw_ui(uiElements, 1);
 
             #ifdef DEBUG
             {
@@ -189,3 +223,18 @@ void inicialization(){
 
     return;
 }
+
+void changeStateButton(button* b){
+    if(b->state == Standbye){
+        b->state = Hover;
+        b->color = al_map_rgb(0, 255, 255);
+
+        return;
+    }
+    if(b->state == Hover){
+        b->state = Standbye;
+        b->color = al_map_rgb(255, 0, 255);
+
+        return;
+    }
+};

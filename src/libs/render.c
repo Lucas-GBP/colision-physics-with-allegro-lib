@@ -24,24 +24,30 @@ void draw_object(solid_object* object, ALLEGRO_COLOR color){
 void draw_ui_element(interactable_ui* obj){
     switch (obj->type){
     case Button:
-        printf("%p\n", obj);
-        printf("%f %f %f %f\n", (float)obj->button.position.x,
-            (float)obj->button.position.y,
-            obj->button.width,
-            obj->button.height);
         al_draw_filled_rectangle(
             (float)obj->button.position.x,
             (float)obj->button.position.y,
             (float)obj->button.position.x+obj->button.width,
             (float)obj->button.position.y+obj->button.height,
-            obj->button.color[obj->button.state]
+            obj->button.color
         );
         return;
     }
 }
 
-void draw_ui(interactable_ui obj[], unsigned int quant){
+void draw_ui(interactable_ui* obj[], unsigned int quant){
     for(unsigned int i = 0; i < quant; i++){
-        draw_ui_element(obj+i);
+        draw_ui_element(obj[i]);
     }
+}
+
+bool isHoverButton(struct interactable_ui* element, ALLEGRO_MOUSE_EVENT* mouse){
+    if(element->button.position.x <= mouse->x &&
+        element->button.position.x + element->button.width >= mouse->x &&
+        element->button.position.y <= mouse->y &&
+        element->button.position.y + element->button.height >= mouse->y
+    ){
+        return true;
+    }
+    return false;
 }

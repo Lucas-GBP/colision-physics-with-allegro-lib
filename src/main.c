@@ -3,10 +3,13 @@
 int main(){
     inicialization();
 
+    int width = WIDTH;
+    int height = HEIGHT;
+
     // Allegro Variables
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60.0);
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
-    ALLEGRO_DISPLAY* disp = al_create_display(1000, 700);
+    ALLEGRO_DISPLAY* disp = al_create_display(width, height);
     ALLEGRO_FONT* font = al_create_builtin_font();
     ALLEGRO_EVENT event;
 
@@ -17,7 +20,8 @@ int main(){
     al_register_event_source(queue, al_get_timer_event_source(timer));
     
     //User input variables
-    bool pressed_keys[ALLEGRO_KEY_MAX];
+    bool pressed_keys[ALLEGRO_KEY_MAX] = {false};
+    printf("%d", pressed_keys[0]); //Só pro compilar parar de encher o saco
     bool pressed_mouse[3];
     ALLEGRO_MOUSE_EVENT mouse;
     mouse.x = 0;
@@ -106,6 +110,8 @@ int main(){
                             uiElements[i]->button.funtionClick(&uiElements[i]->button);
                             pressed_mouse[1] = false;
                         }
+                        break;
+                    case UiQuant:
                         break;
                     }
                 }

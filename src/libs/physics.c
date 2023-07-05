@@ -3,11 +3,11 @@
 #define MAX_RANDOM_SIZE 6
 
 solid_object* create_solid_object(
-    int32_t x, int32_t y,
-    int16_t vx, int16_t vy,
-    int16_t axie_v,
+    float x, float y,
+    float vx, float vy,
+    float axie_v,
     void (*colision_reaction)(void*),
-    uint16_t mass,
+    float mass,
     enum shape_types shape_type,
     union shapes shape
 ){
@@ -34,27 +34,27 @@ solid_object* create_solid_object(
     return object;
 }
 
-solid_object* random_object(int32_t width, int32_t height, enum shape_types shape_type){
+solid_object* random_object(int width, int height, enum shape_types shape_type){
     struct solid_object* object = malloc(sizeof(struct solid_object));
 
     object->shape_type = shape_type;
     switch (object->shape_type){
         case Rectangle:
-            object->rectangle.width = (uint16_t)(rand()%MAX_RANDOM_SIZE+1);
-            object->rectangle.height = (uint16_t)(rand()%MAX_RANDOM_SIZE+1);
-            object->position[0] = rand()%(width-object->rectangle.width+1);
-            object->position[1] = rand()%(height-object->rectangle.height+1);
+            object->rectangle.width = (float)(rand()%MAX_RANDOM_SIZE+1);
+            object->rectangle.height = (float)(rand()%MAX_RANDOM_SIZE+1);
+            object->position[0] = (float)(rand()%(width-(int)object->rectangle.width+1));
+            object->position[1] = (float)(rand()%(height-(int)object->rectangle.height+1));
             break;
         case Circle:
-            object->circle.radius = (uint16_t)(rand()%(MAX_RANDOM_SIZE/2)+1);
-            object->position[0] = rand()%(width-object->circle.radius*2+1);
-            object->position[1] = rand()%(height-object->circle.radius*2+1);
+            object->circle.radius = (float)(rand()%(MAX_RANDOM_SIZE/2)+1);
+            object->position[0] = (float)(rand()%(width-(int)object->circle.radius*2+1));
+            object->position[1] = (float)(rand()%(height-(int)object->circle.radius*2+1));
             break;
     }
-    object->velocity[0] = (int16_t)(rand()%16-8);
-    object->velocity[1] = (int16_t)(rand()%16-8);
+    object->velocity[0] = (float)(rand()%16-8);
+    object->velocity[1] = (float)(rand()%16-8);
     object->axie_velocity = 0;
-    object->colision_reaction = generic_colision_reaction;
+    object->colision_reaction = (void (*)(void *))generic_colision_reaction;
     object->mass = 0;
 
     return object;
@@ -70,12 +70,11 @@ void destroy_solid_object(solid_object* object){
 }
 
 void print_solid_object(solid_object* object){
-    printf("x:%i\ty:%i\nv_x:%i\tv_y:%i\nmass:%i\nshape:%i\nheight:%i\twidth:%i\n",
+    printf("x:%f\ty:%f\nv_x:%f\tv_y:%f\nmass:%f\nshape:%i\n",
         object->position[0],object->position[1],
         object->velocity[0], object->velocity[1],
         object->mass,
-        object->shape_type,
-        object->rectangle.height, object->rectangle.width       
+        object->shape_type     
     );
 }
 
@@ -84,7 +83,7 @@ void move_object(solid_object* object){
     object->position[1] += object->velocity[1];
 }
 
-bool border_colision_detection(solid_object* object, int32_t width, int32_t height){
+bool border_colision_detection(solid_object* object, int width, int height){
     switch (object->shape_type){
     case Rectangle:
         if(
@@ -107,7 +106,7 @@ bool border_colision_detection(solid_object* object, int32_t width, int32_t heig
     return false;
 }
 
-bool border_colision_handling(solid_object* object, int32_t width, int32_t height){
+bool border_colision_handling(solid_object* object, int width, int height){
     if(border_colision_detection(object, width, height)){
         switch (object->shape_type){
         case Rectangle:
@@ -116,7 +115,7 @@ bool border_colision_handling(solid_object* object, int32_t width, int32_t heigh
                 object->position[0] = 0;
             } else if (object->position[0] + object->rectangle.width > width){
                 object->velocity[0] = -object->velocity[0];
-                object->position[0] = width - object->rectangle.width;
+                object->position[0] = (float)width - object->rectangle.width;
             }
             
             if (object->position[1] < 0){
@@ -124,24 +123,24 @@ bool border_colision_handling(solid_object* object, int32_t width, int32_t heigh
                object->position[1] = 0;
             } else if (object->position[1] + object->rectangle.height > height){
                 object->velocity[1] = -object->velocity[1];
-                object->position[1] = height - object->rectangle.height;
+                object->position[1] = (float)height - object->rectangle.height;
             }
             break;
         case Circle:
             if(object->position[0] < 0){
                 object->velocity[0] = -object->velocity[0];
                 object->position[0] = 0;
-            } else if((int32_t)(object->position[0] + object->circle.radius*2) > width){
+            } else if((object->position[0] + object->circle.radius*2) > width){
                 object->velocity[0] = -object->velocity[0];
-                object->position[0] = width - (int32_t)(object->circle.radius*2);
+                object->position[0] = (float)width - (object->circle.radius*2);
             }
 
             if(object->position[1] < 0){
                 object->velocity[1] = -object->velocity[1];
                 object->position[1] = 0;
-            } else if((int32_t)(object->position[1] + object->circle.radius*2) > height){
+            } else if((object->position[1] + object->circle.radius*2) > height){
                 object->velocity[1] = -object->velocity[1];
-                object->position[1] = height - (int32_t)(object->circle.radius*2);
+                object->position[1] = (float)height - (object->circle.radius*2);
             }
             break;
         }
@@ -151,7 +150,7 @@ bool border_colision_handling(solid_object* object, int32_t width, int32_t heigh
     return false;
 }
 
-void update_physics(solid_object* objects[], int obj_quant, uint32_t width, uint32_t height){
+void update_physics(solid_object* objects[], int obj_quant, int width, int height){
     for(int i = 0; i < obj_quant; i++){
         move_object(objects[i]);
         border_colision_handling(objects[i], width, height);

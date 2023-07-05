@@ -32,6 +32,8 @@ void draw_ui_element(interactable_ui* obj){
             obj->button.color
         );
         return;
+    case UiQuant:
+        break;
     }
 }
 

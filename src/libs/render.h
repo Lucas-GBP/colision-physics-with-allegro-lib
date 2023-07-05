@@ -22,7 +22,7 @@ struct button{
 
 };typedef struct button button;
 
-enum ui_types {Button, DragNDrop, UiQuant};
+enum ui_types {Button, UiQuant};
 
 struct interactable_ui{
     enum ui_types type;

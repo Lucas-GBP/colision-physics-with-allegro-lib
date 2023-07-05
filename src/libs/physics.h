@@ -10,20 +10,20 @@
 enum shape_types {Rectangle, Circle};
 
 struct rectangle_shape{
-    uint16_t width;
-    uint16_t height;
+    float width;
+    float height;
 };
 
 struct circle_shape{
-    uint16_t radius;
+    float radius;
 };
 
 struct solid_object{
-    int32_t position[2];
-    int16_t velocity[2];
-    int16_t axie_velocity;
+    float position[2];
+    float velocity[2];
+    float axie_velocity;
     void (*colision_reaction)(void*);
-    uint16_t mass;
+    float mass;
     enum shape_types shape_type;
     union{
         struct rectangle_shape rectangle;
@@ -37,21 +37,21 @@ union shapes{
 };
 
 solid_object* create_solid_object(
-    int32_t x, int32_t y,
-    int16_t vx, int16_t vy,
-    int16_t axie_v,
+    float x, float y,
+    float vx, float vy,
+    float axie_v,
     void (*colision_reaction)(void*),
-    uint16_t mass,
+    float mass,
     enum shape_types shape_type,
     union shapes shape
 );
 void destroy_solid_object(solid_object* object);
-solid_object* random_object(int32_t width, int32_t height, enum shape_types shape_type);
+solid_object* random_object(int width, int height, enum shape_types shape_type);
 void generic_colision_reaction(solid_object* object);
 void print_solid_object(solid_object* object);
 void move_object(solid_object* object);
-bool border_colision_detection(solid_object* object, int32_t width, int32_t height);
-bool border_colision_handling(solid_object* object, int32_t width, int32_t height);
-void update_physics(solid_object* objects[], int obj_quant, uint32_t width, uint32_t height);
+bool border_colision_detection(solid_object* object, int width, int height);
+bool border_colision_handling(solid_object* object, int width, int height);
+void update_physics(solid_object* objects[], int obj_quant, int width, int height);
 
 #endif

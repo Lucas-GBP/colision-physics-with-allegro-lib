@@ -36,7 +36,7 @@ int main(){
         .button = {
             .width = 50,
             .height = 50,
-            .position = {.x = (WIDTH-50)/2, .y = (HEIGHT-50)/2},
+            .position = {.x = (WIDTH-50), .y = (HEIGHT-50)},
             .label = "A Button",
             .state = Standbye,
             .color = al_map_rgb(255, 255, 0),
@@ -45,24 +45,8 @@ int main(){
             .functionHover = NULL,
         }
     };
-    interactable_ui testButtonS = {
-        .type = Button,
-        .isHover = isHoverButton,
-        .button = {
-            .width = 50,
-            .height = 50,
-            .position = {.x = ((WIDTH-50)/2)+50, .y = (HEIGHT-50)/2},
-            .label = "A Button",
-            .state = Standbye,
-            .color = al_map_rgb(255, 255, 0),
-            .arguments = NULL,
-            .funtionClick = changeStateButton,
-            .functionHover = NULL,
-        }
-    };
-
     interactable_ui* uiElements[UI_OBJ_QUANT] = {
-        &testButton, &testButtonS
+        &testButton
     };
 
     // Loop variables
@@ -151,15 +135,16 @@ int main(){
 
             #ifdef DEBUG
             {
+                const ALLEGRO_COLOR debugWhite = al_map_rgb(255, 255, 255);
                 //FPS
-                al_draw_textf(font, al_map_rgb(255, 255, 255), 5, 5, ALLEGRO_ALIGN_LEFT, "%lf", fps);
+                al_draw_textf(font, debugWhite, 5, 5, ALLEGRO_ALIGN_LEFT, "%lf", fps);
                 //FPS grath
                 const int gx = 5;
                 const int gy = 35;
                 const int gw = 100;
                 const int gh = 65;
-                al_draw_line((float)gx, (float)gy, (float)gx, (float)(gy+gh), al_map_rgb(255, 255, 255), 1);
-                al_draw_line((float)gx, (float)(gy+gh), (float)(gx+gw), (float)(gy+gh), al_map_rgb(255, 255, 255), 1);
+                al_draw_line((float)gx, (float)gy, (float)gx, (float)(gy+gh), debugWhite, 1);
+                al_draw_line((float)gx, (float)(gy+gh), (float)(gx+gw), (float)(gy+gh), debugWhite, 1);
                 for(int i = 0; i < FPS_LIST_QUANT-1; i++){
                     al_draw_line(
                         (float)(gx+i),
@@ -173,7 +158,7 @@ int main(){
                 // Mouse position
                 al_draw_textf(
                     font, 
-                    al_map_rgb(255, 255, 255), 
+                    debugWhite, 
                     (float)(mouse.x+20), 
                     (float)(mouse.y+20), 
                     ALLEGRO_ALIGN_LEFT,
@@ -190,7 +175,7 @@ int main(){
                             (float)(my),
                             (float)(mx+(i+1)*10),
                             (float)(my+10),
-                            al_map_rgb(255, 255, 255)
+                            debugWhite
                         );
                     }
                 }

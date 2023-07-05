@@ -16,7 +16,7 @@
 #define WIDTH 1000
 #define HEIGHT 700
 #define SOLID_OBJ_QUANT 1000
-#define UI_OBJ_QUANT 2
+#define UI_OBJ_QUANT 1
 #define FPS_LIST_QUANT 100
 
 void inicialization();

@@ -12,14 +12,14 @@ visibleObject* create_visibleObject(solidObject* obj, ALLEGRO_COLOR fill){
 void draw_object(visibleObject* object){
     switch (object->object->shapeType){
     case Rectangle:
-        al_draw_rectangle(
+        /*al_draw_rectangle(
             object->object->position.x-object->object->rectangle.width_2, 
             object->object->position.y-object->object->rectangle.height_2,
             object->object->position.x+object->object->rectangle.width_2,
             object->object->position.y+object->object->rectangle.height_2,
             al_map_rgb(255, 255, 255),
             1
-        );
+        );*/
         draw_rectangle(object);
 
         break;

@@ -8,6 +8,8 @@
 #include <math.h>
 #include "vectors.h"
 
+#define DEBUG_PHYSICS
+
 enum shapeTypes {Circle, Rectangle};
 
 typedef struct circleShape{
@@ -61,10 +63,10 @@ void print_solid_object(solid_object* object);
 //
 // Physics stuff
 void move_object(solid_object* object);
-bool detectColision(solidObject* a, solidObject* b);
-bool detectColision_CircleCircle(solidObject* a, solidObject* b);
-bool detectColision_RectangleRectangle(solidObject* a, solidObject* b);
-bool detectColision_RectangleCircle(solidObject* r, solidObject* c);
+bool detectColision(solidObject* a, solidObject* b, vector2d* colisionPoint);
+bool detectColision_CircleCircle(solidObject* a, solidObject* b, vector2d* colisionPoint);
+bool detectColision_RectangleRectangle(solidObject* a, solidObject* b, vector2d* colisionPoint);
+bool detectColision_RectangleCircle(solidObject* r, solidObject* c, vector2d* colisionPoint);
 void update_physics(solid_object* objects[], int obj_quant, int width, int height);
 void updateRotationVector(solidObject* obj);
 

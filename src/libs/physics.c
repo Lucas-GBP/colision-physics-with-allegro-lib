@@ -1,6 +1,6 @@
 #include "physics.h"
 
-#include <allegro5\allegro_primitives.h>
+#include "render.h"
 
 #define MAX_RANDOM_SIZE 6
 
@@ -61,23 +61,23 @@ void move_object(solid_object* object){
     object->position.y += object->velocity.y;
 }
 
-bool detectColision(solidObject* a, solidObject* b){
+bool detectColision(solidObject* a, solidObject* b, vector2d* colisionPoint){
     switch (a->shapeType){
     case Circle:
         switch (b->shapeType){
         case Circle:
-            return detectColision_CircleCircle(a, b);
+            return detectColision_CircleCircle(a, b, colisionPoint);
         case Rectangle:
-            return detectColision_RectangleCircle(b, a);
+            return detectColision_RectangleCircle(b, a, colisionPoint);
         }
 
         break;
     case Rectangle:
         switch (b->shapeType){
         case Circle:
-            return detectColision_RectangleCircle(a, b);
+            return detectColision_RectangleCircle(a, b, colisionPoint);
         case Rectangle:
-            return detectColision_RectangleRectangle(a, b);
+            return detectColision_RectangleRectangle(a, b, colisionPoint);
         }
         break;
     }
@@ -85,27 +85,84 @@ bool detectColision(solidObject* a, solidObject* b){
     return false;
 }
 
-bool detectColision_CircleCircle(solidObject* a, solidObject* b){
-	return (vector2d_distance(&a->position, &b->position) <= a->circle.radius+b->circle.radius);
+//TODO point of colision
+bool detectColision_CircleCircle(solidObject* a, solidObject* b, vector2d* colisionPoint){
+    if(vector2d_distance(&a->position, &b->position) <= a->circle.radius+b->circle.radius){
+        return true;
+    }
+	return false;
 }
 
-//TODO
-bool detectColision_RectangleRectangle(solidObject* a, solidObject* b){
-    return false;
+//TODO everything
+bool detectColision_RectangleRectangle(solidObject* a, solidObject* b, vector2d* colisionPoint){
+    vector2d bPost = b->position;
+    vector2d bRot = b->rotation;
+    vector2d_rotateCenterInverse(&bPost, &a->rotation, &a->position);
+    vector2d_rotateInverse(&bRot, &a->rotation);
+    
+    float bigScale = (fabsf(bRot.x) + fabsf(bRot.y));
+    float bigWidth_2 = b->rectangle.width_2*bigScale;
+    float bigHeight_2 = b->rectangle.height_2*bigScale;
+
+    #ifdef DEBUG_PHYSICS
+    al_draw_rectangle(
+        a->position.x-a->rectangle.width_2,
+        a->position.y-a->rectangle.height_2,
+        a->position.x+a->rectangle.width_2,
+        a->position.y+a->rectangle.height_2,
+        al_map_rgb(255, 255, 255),
+        1
+    );
+    al_draw_rectangle(
+        bPost.x - bigWidth_2,
+        bPost.y - bigHeight_2,
+        bPost.x + bigWidth_2,
+        bPost.y + bigHeight_2,
+        al_map_rgb(255, 255, 255),
+        1
+    );
+    solidObject bProjection = *b;
+    bProjection.position = bPost;
+    bProjection.rotation = bRot;
+    visibleObject obj = {
+        .object = &bProjection,
+        .fillColor = al_map_rgb(255, 255, 255)
+    };
+    draw_rectangle(&obj);
+    #endif
+
+    if(!(   //First collision detection Big B object
+        a->position.x-a->rectangle.width_2 <= bPost.x + bigWidth_2 &&
+        a->position.x+a->rectangle.width_2 >= bPost.x - bigWidth_2 &&
+        a->position.y-a->rectangle.height_2 <= bPost.y + bigHeight_2 &&
+        a->position.y+a->rectangle.height_2 >= bPost.y - bigHeight_2
+    )){
+        return false;
+    }
+
+    return true;
 }
 
-//TODO
-bool detectColision_RectangleCircle(solidObject* r, solidObject* c){
+bool detectColision_RectangleCircle(solidObject* r, solidObject* c, vector2d* colisionPoint){
     vector2d cirPos = c->position; //Position relative to rectangle rotation axie
-
     vector2d_rotateCenterInverse(&cirPos, &r->rotation, &r->position);
 
+    #ifdef DEBUG_PHYSICS
+    al_draw_rectangle(
+        r->position.x-r->rectangle.width_2, 
+        r->position.y-r->rectangle.height_2,
+        r->position.x+r->rectangle.width_2,
+        r->position.y+r->rectangle.height_2,
+        al_map_rgb(255, 255, 255),
+        1
+    );
     al_draw_circle(
         cirPos.x, cirPos.y,
         c->circle.radius,
         al_map_rgb(255, 255, 255),
         1
     );
+    #endif
 
     vector2d test = cirPos;
     const float leftEdge = r->position.x - r->rectangle.width_2;
@@ -124,7 +181,32 @@ bool detectColision_RectangleCircle(solidObject* r, solidObject* c){
         test.y = bottomEdge;
     }
 
-    return (vector2d_distance(&test, &cirPos) <= r->circle.radius);
+    #ifdef DEBUG_PHYSICS
+    al_draw_line(
+        cirPos.x, cirPos.y,
+        test.x, test.y,
+        al_map_rgb(255, 255, 255),
+        1
+    );
+    al_draw_filled_circle(
+        cirPos.x, cirPos.y,
+        3,
+        al_map_rgb(255, 0, 0)
+    );
+    al_draw_filled_circle(
+        test.x, test.y,
+        3,
+        al_map_rgb(255, 0, 0)
+    );
+    #endif
+
+    const float distance = vector2d_distance(&test, &cirPos);
+    if(distance <= c->circle.radius){
+        *colisionPoint = test;
+        return true;
+    }
+
+    return false;
 }
 
 void update_physics(solid_object* objects[], int obj_quant, int width, int height){

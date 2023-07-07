@@ -44,19 +44,18 @@ int main(){
             0, 0,
             Rectangle,
             30,
-            50, 20     
+            100, 100     
         ),
         create_solidObject(
-            (float)(width/2-110), (float)(height/2),
+            (float)(width/2-200), (float)(height/2),
             0, 0,
             1,
             0, 0,
             Circle,
             50,
-            0, 0     
+            10, 10     
         )
     };
-    print_2dVector(&objects[0]->rotation);
     visibleObject* visibleObjects[SOLID_OBJ_QUANT];
     for(int i = 0; i < SOLID_OBJ_QUANT; i++){
         visibleObjects[i] = create_visibleObject(objects[i], colorCyan);
@@ -152,15 +151,21 @@ int main(){
             if(pressed_keys[ALLEGRO_KEY_RIGHT]){
                 objects[1]->position.x += 5;
             }
+            if(pressed_keys[ALLEGRO_KEY_G]){
+                objects[1]->theta += 0.02;
+                updateRotationVector(objects[1]);
+            }
             if(pressed_keys[ALLEGRO_KEY_R]){
-                objects[0]->theta += 0.01;
-                printf("%f\n", objects[0]->theta);
-                print_2dVector(&objects[0]->rotation);
+                objects[0]->theta += 0.02;
                 updateRotationVector(objects[0]);
+            }
+            if(pressed_keys[ALLEGRO_KEY_ESCAPE]){
+                loop = false;
             }
 
             update_physics(objects, SOLID_OBJ_QUANT, width, height);
-            if(detectColision(objects[0], objects[1])){
+            vector2d colisionPoint;
+            if(detectColision(objects[0], objects[1], &colisionPoint)){
                 visibleObjects[1]->fillColor = colorMagenta;
             } else {
                 visibleObjects[1]->fillColor = colorCyan;

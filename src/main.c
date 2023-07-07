@@ -5,6 +5,15 @@ int main(){
 
     int width = WIDTH;
     int height = HEIGHT;
+    // Some constants
+    const ALLEGRO_COLOR colorWhite = al_map_rgb(255, 255, 255);
+    const ALLEGRO_COLOR colorblack = al_map_rgb(0, 0, 0);
+    const ALLEGRO_COLOR colorCyan = al_map_rgb(0, 255, 255);
+    const ALLEGRO_COLOR colorMagenta = al_map_rgb(255, 0, 255);
+    const ALLEGRO_COLOR colorYellow = al_map_rgb(255, 255, 0);
+    const ALLEGRO_COLOR colorRed = al_map_rgb(255, 0, 0);
+    const ALLEGRO_COLOR colorGreen = al_map_rgb(0, 255, 0);
+    const ALLEGRO_COLOR colorBlue = al_map_rgb(0, 0, 255);
 
     // Allegro Variables
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 60.0);
@@ -21,36 +30,41 @@ int main(){
     
     //User input variables
     bool pressed_keys[ALLEGRO_KEY_MAX] = {false};
-    printf("%d", pressed_keys[0]); //Só pro compilar parar de encher o saco
     bool pressed_mouse[3];
     ALLEGRO_MOUSE_EVENT mouse;
     mouse.x = 0;
     mouse.y = 0;
 
     // Alocating physical objects
-    solid_object* objects[SOLID_OBJ_QUANT];
-    for(uint64_t i = 0; i < SOLID_OBJ_QUANT; i++){
-        objects[i] = random_object(WIDTH, HEIGHT, Circle);
+    solidObject* objects[SOLID_OBJ_QUANT] = {
+        create_solidObject(
+            (float)(width/2), (float)(height/2),
+            0, 0,
+            1,
+            0, 0,
+            Rectangle,
+            30,
+            50, 20     
+        ),
+        create_solidObject(
+            (float)(width/2-110), (float)(height/2),
+            0, 0,
+            1,
+            0, 0,
+            Circle,
+            50,
+            0, 0     
+        )
+    };
+    print_2dVector(&objects[0]->rotation);
+    visibleObject* visibleObjects[SOLID_OBJ_QUANT];
+    for(int i = 0; i < SOLID_OBJ_QUANT; i++){
+        visibleObjects[i] = create_visibleObject(objects[i], colorCyan);
     }
+    
 
     // Alocating Ui Elements
-    interactable_ui testButton = {
-        .type = Button,
-        .isHover = isHoverButton,
-        .button = {
-            .width = 50,
-            .height = 50,
-            .position = {.x = (WIDTH-50), .y = (HEIGHT-50)},
-            .label = "A Button",
-            .state = Standbye,
-            .color = al_map_rgb(255, 255, 0),
-            .arguments = NULL,
-            .funtionClick = changeStateButton,
-            .functionHover = NULL,
-        }
-    };
     interactable_ui* uiElements[UI_OBJ_QUANT] = {
-        &testButton
     };
 
     // Loop variables
@@ -123,48 +137,70 @@ int main(){
         // Executed each time event when as the last event
         if(redraw && al_is_event_queue_empty(queue)){
             // Clean buffer
-            al_clear_to_color(al_map_rgb(0, 0, 0));
+            al_clear_to_color(colorblack);
 
             // Update all physical bodies
-            update_physics(objects, SOLID_OBJ_QUANT, WIDTH, HEIGHT);
+            if(pressed_keys[ALLEGRO_KEY_UP]){
+                objects[1]->position.y -= 5;
+            }
+            if(pressed_keys[ALLEGRO_KEY_DOWN]){
+                objects[1]->position.y += 5;
+            }
+            if(pressed_keys[ALLEGRO_KEY_LEFT]){
+                objects[1]->position.x -= 5;
+            }
+            if(pressed_keys[ALLEGRO_KEY_RIGHT]){
+                objects[1]->position.x += 5;
+            }
+            if(pressed_keys[ALLEGRO_KEY_R]){
+                objects[0]->theta += 0.01;
+                printf("%f\n", objects[0]->theta);
+                print_2dVector(&objects[0]->rotation);
+                updateRotationVector(objects[0]);
+            }
+
+            update_physics(objects, SOLID_OBJ_QUANT, width, height);
+            if(detectColision(objects[0], objects[1])){
+                visibleObjects[1]->fillColor = colorMagenta;
+            } else {
+                visibleObjects[1]->fillColor = colorCyan;
+            }
 
             //
             //Draw all elements
             //
-
             // Physics elements
             for(int i = 0; i < SOLID_OBJ_QUANT; i++){
-                draw_object(objects[i], al_map_rgb(0, 255, 255));
+                draw_object(visibleObjects[i]);
             }
             // UI Elements
             draw_ui(uiElements, UI_OBJ_QUANT);
 
             #ifdef DEBUG
             {
-                const ALLEGRO_COLOR debugWhite = al_map_rgb(255, 255, 255);
                 //FPS
-                al_draw_textf(font, debugWhite, 5, 5, ALLEGRO_ALIGN_LEFT, "%lf", fps);
+                al_draw_textf(font, colorWhite, 5, 5, ALLEGRO_ALIGN_LEFT, "%lf", fps);
                 //FPS grath
                 const int gx = 5;
                 const int gy = 35;
                 const int gw = 100;
                 const int gh = 65;
-                al_draw_line((float)gx, (float)gy, (float)gx, (float)(gy+gh), debugWhite, 1);
-                al_draw_line((float)gx, (float)(gy+gh), (float)(gx+gw), (float)(gy+gh), debugWhite, 1);
+                al_draw_line((float)gx, (float)gy, (float)gx, (float)(gy+gh), colorWhite, 1);
+                al_draw_line((float)gx, (float)(gy+gh), (float)(gx+gw), (float)(gy+gh), colorWhite, 1);
                 for(int i = 0; i < FPS_LIST_QUANT-1; i++){
                     al_draw_line(
                         (float)(gx+i),
                         (float)(gy+gh-fps_list[i]),
                         (float)(gx+1+i),
                         (float)(gy+gh-fps_list[i+1]),
-                        al_map_rgb(255, 55, 255),
+                        colorMagenta,
                         1
                     );
                 }
                 // Mouse position
                 al_draw_textf(
                     font, 
-                    debugWhite, 
+                    colorWhite, 
                     (float)(mouse.x+20), 
                     (float)(mouse.y+20), 
                     ALLEGRO_ALIGN_LEFT,
@@ -181,7 +217,7 @@ int main(){
                             (float)(my),
                             (float)(mx+(i+1)*10),
                             (float)(my+10),
-                            debugWhite
+                            colorWhite
                         );
                     }
                 }
@@ -203,7 +239,6 @@ int main(){
                 }
                 fps_list[FPS_LIST_QUANT-1] = (uint8_t)fps;
             }
-
             //restar counting
             redraw = false;
         }
@@ -211,6 +246,7 @@ int main(){
 
     for(int i = 0; i < SOLID_OBJ_QUANT; i++){
         free(objects[i]);
+        free(visibleObjects[i]);
     }
 
     //Destroing allegro events

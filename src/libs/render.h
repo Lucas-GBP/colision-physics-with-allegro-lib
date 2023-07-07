@@ -8,6 +8,12 @@
 #include "physics.h"
 #include "vectors.h"
 
+typedef struct visibleObject{
+    solid_object* object;
+    ALLEGRO_COLOR fillColor;
+} visibleObject;
+
+
 enum button_state {Standbye, Hover, Hold};
 struct button{
     struct {float x; float y;} position;
@@ -36,7 +42,9 @@ struct interactable_ui{
 
 #define FPS_SAMPLE 3
 
-void draw_object(solid_object* object, ALLEGRO_COLOR color);
+visibleObject* create_visibleObject(solidObject* obj, ALLEGRO_COLOR fill);
+void draw_object(visibleObject* object);
+void draw_rectangle(visibleObject* object);
 void draw_ui_element(interactable_ui* obj);
 void draw_ui(interactable_ui* obj[], unsigned int quant);
 bool isHoverButton(struct interactable_ui* button, ALLEGRO_MOUSE_EVENT* mouse);

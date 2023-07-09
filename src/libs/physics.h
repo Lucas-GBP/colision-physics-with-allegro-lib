@@ -6,52 +6,68 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <math.h>
+#include "vectors.h"
 
-enum shape_types {Rectangle, Circle};
+#define DEBUG_PHYSICS
 
-struct rectangle_shape{
-    float width;
-    float height;
-};
+enum shapeTypes {Circle, Rectangle};
 
-struct circle_shape{
-    float radius;
-};
+typedef struct circleShape{
+	float radius;
+} circleShape;
+typedef struct rectangleShape{
+	float width_2; 
+	float height_2;
+} rectangleShape;
 
-struct solid_object{
-    float position[2];
-    float velocity[2];
-    float axie_velocity;
-    void (*colision_reaction)(void*);
-    float mass;
-    enum shape_types shape_type;
-    union{
-        struct rectangle_shape rectangle;
-        struct circle_shape circle;
-    };
-}; typedef struct solid_object solid_object;
+typedef union Shapes {
+	struct circleShape circle;
+	struct rectangleShape rectangle;
+} Shapes;
 
-union shapes{
-    struct rectangle_shape rectangle;
-    struct circle_shape circle;
-};
+typedef struct solidObject {
+	vector2d position;    //Center of mass
+    vector2d velocity;    //Velocity vector
+	vector2d rotation;    //Unitary rotation vector
+	float inverseMass;    //mass^{-1}
+	float theta;          //Rotation Angle 
+	float omega;          //Angular Aceleration
+	
+	enum shapeTypes shapeType; // 
+	union {
+		struct circleShape circle;
+		struct rectangleShape rectangle;
+	} ;           //
+} solidObject;
+typedef solidObject solid_object;
 
-solid_object* create_solid_object(
+//
+// Functions
+//
+
+//
+// Create a object
+solidObject* create_solidObject(
     float x, float y,
     float vx, float vy,
-    float axie_v,
-    void (*colision_reaction)(void*),
-    float mass,
-    enum shape_types shape_type,
-    union shapes shape
+    float imass,
+    float theta, float omega,
+    enum shapeTypes shapeType,
+    float radius,
+    float width_2, float height_2
 );
 void destroy_solid_object(solid_object* object);
-solid_object* random_object(int width, int height, enum shape_types shape_type);
+solid_object* random_object(int width, int height, enum shapeTypes shapeType);
 void generic_colision_reaction(solid_object* object);
 void print_solid_object(solid_object* object);
+//
+// Physics stuff
 void move_object(solid_object* object);
-bool border_colision_detection(solid_object* object, int width, int height);
-bool border_colision_handling(solid_object* object, int width, int height);
+bool detectColision(solidObject* a, solidObject* b, vector2d* colisionPoint);
+bool detectColision_CircleCircle(solidObject* a, solidObject* b, vector2d* colisionPoint);
+bool detectColision_RectangleRectangle(solidObject* a, solidObject* b, vector2d* colisionPoint);
+bool detectColision_RectangleCircle(solidObject* r, solidObject* c, vector2d* colisionPoint);
 void update_physics(solid_object* objects[], int obj_quant, int width, int height);
+void updateRotationVector(solidObject* obj);
 
 #endif

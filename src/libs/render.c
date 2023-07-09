@@ -1,21 +1,34 @@
 #include "render.h"
 
-void draw_object(solid_object* object, ALLEGRO_COLOR color){
-    switch (object->shape_type){
+visibleObject* create_visibleObject(solidObject* obj, ALLEGRO_COLOR fill){
+    visibleObject* vis = malloc(sizeof(visibleObject));
+
+    vis->fillColor = fill;
+    vis->object = obj;
+
+    return vis;
+}
+
+void draw_object(visibleObject* object){
+    switch (object->object->shapeType){
     case Rectangle:
-        al_draw_filled_rectangle(
-            (float)object->position[0], (float)object->position[1],
-            (float)(object->position[0]+object->rectangle.width),
-            (float)(object->position[1]+object->rectangle.height),
-            color
-        );
+        /*al_draw_rectangle(
+            object->object->position.x-object->object->rectangle.width_2, 
+            object->object->position.y-object->object->rectangle.height_2,
+            object->object->position.x+object->object->rectangle.width_2,
+            object->object->position.y+object->object->rectangle.height_2,
+            al_map_rgb(255, 255, 255),
+            1
+        );*/
+        draw_rectangle(object);
+
         break;
     case Circle:
         al_draw_filled_circle(
-            (float)(object->position[0]+object->circle.radius),
-            (float)(object->position[1]+object->circle.radius),
-            (float)object->circle.radius,
-            color
+            object->object->position.x,
+            object->object->position.y,
+            object->object->circle.radius,
+            object->fillColor
         );
         break;
     }
@@ -35,6 +48,44 @@ void draw_ui_element(interactable_ui* obj){
     case UiQuant:
         break;
     }
+}
+
+void draw_rectangle(visibleObject* object){
+    vector2d leftTop = {
+        .x = object->object->position.x - object->object->rectangle.width_2,
+        .y = object->object->position.y - object->object->rectangle.height_2
+    };
+    vector2d leftBottom = {
+        .x = object->object->position.x - object->object->rectangle.width_2,
+        .y = object->object->position.y + object->object->rectangle.height_2
+    };
+    vector2d rightTop = {
+        .x = object->object->position.x + object->object->rectangle.width_2,
+        .y = object->object->position.y - object->object->rectangle.height_2
+    };
+    vector2d rightBottom = {
+        .x = object->object->position.x + object->object->rectangle.width_2,
+        .y = object->object->position.y + object->object->rectangle.height_2
+    };
+
+    vector2d_rotateCenter(&leftTop, &object->object->rotation, &object->object->position);
+    vector2d_rotateCenter(&leftBottom, &object->object->rotation, &object->object->position);
+    vector2d_rotateCenter(&rightTop, &object->object->rotation, &object->object->position);
+    vector2d_rotateCenter(&rightBottom, &object->object->rotation, &object->object->position);
+
+
+    al_draw_filled_triangle(
+        leftTop.x, leftTop.y,
+        leftBottom.x, leftBottom.y,
+        rightTop.x, rightTop.y,
+        object->fillColor
+    );
+    al_draw_filled_triangle(
+        rightBottom.x, rightBottom.y,
+        leftBottom.x, leftBottom.y,
+        rightTop.x, rightTop.y,
+        object->fillColor
+    );
 }
 
 void draw_ui(interactable_ui* obj[], unsigned int quant){

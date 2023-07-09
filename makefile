@@ -1,5 +1,6 @@
 CC := gcc
 SOURCE_FILES := src\main.c src\libs\physics.c src\libs\render.c src\libs\vectors.c
+
 O_FILES := $(subst src\,build\,$(SOURCE_FILES:.c=.o))
 TARGET := executable.exe
 WARNINGS := -Wall -Wextra -Wshadow -Wconversion
@@ -9,7 +10,7 @@ C_FLAGS := -O2 $(ALLEGRO_TAGS) $(WARNINGS)
 $(TARGET): $(O_FILES)
 	$(CC) $^ -o $(TARGET) $(C_FLAGS)
 
-build\\%.o: src\%.c
+build\\%.o: src\%.c src\%.h
 	$(CC) $(C_FLAGS) -c -o $@ $<
 
 build: $(TARGET)

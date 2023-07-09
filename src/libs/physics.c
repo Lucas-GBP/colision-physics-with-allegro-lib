@@ -85,9 +85,11 @@ bool detectColision(solidObject* a, solidObject* b, vector2d* colisionPoint){
     return false;
 }
 
-//TODO point of colision
 bool detectColision_CircleCircle(solidObject* a, solidObject* b, vector2d* colisionPoint){
     if(vector2d_distance(&a->position, &b->position) <= a->circle.radius+b->circle.radius){
+        colisionPoint->x = (a->position.x + b->position.x)/2;
+        colisionPoint->y = (a->position.y + b->position.y)/2;
+        
         return true;
     }
 	return false;
@@ -191,17 +193,17 @@ bool detectColision_RectangleCircle(solidObject* r, solidObject* c, vector2d* co
     al_draw_filled_circle(
         cirPos.x, cirPos.y,
         3,
-        al_map_rgb(255, 0, 0)
+        al_map_rgb(0, 255, 0)
     );
     al_draw_filled_circle(
         test.x, test.y,
         3,
-        al_map_rgb(255, 0, 0)
+        al_map_rgb(0, 255, 0)
     );
     #endif
 
-    const float distance = vector2d_distance(&test, &cirPos);
-    if(distance <= c->circle.radius){
+    if(vector2d_distance(&test, &cirPos) <= c->circle.radius){
+        vector2d_rotateCenter(&test, &r->rotation, &r->position);
         *colisionPoint = test;
         return true;
     }
@@ -209,7 +211,7 @@ bool detectColision_RectangleCircle(solidObject* r, solidObject* c, vector2d* co
     return false;
 }
 
-void update_physics(solid_object* objects[], int obj_quant, int width, int height){
+void update_physics(solidObject* objects[], int obj_quant, int width, int height){
     for(int i = 0; i < obj_quant; i++){
         move_object(objects[i]);
     }

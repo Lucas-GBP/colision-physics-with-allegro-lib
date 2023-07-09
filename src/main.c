@@ -60,7 +60,10 @@ int main(){
     for(int i = 0; i < SOLID_OBJ_QUANT; i++){
         visibleObjects[i] = create_visibleObject(objects[i], colorCyan);
     }
-    
+    vector2d colisionPoint = {
+        .x = (float)width/2,
+        .y = (float)height/2
+    };
 
     // Alocating Ui Elements
     interactable_ui* uiElements[UI_OBJ_QUANT] = {
@@ -152,11 +155,11 @@ int main(){
                 objects[1]->position.x += 5;
             }
             if(pressed_keys[ALLEGRO_KEY_G]){
-                objects[1]->theta += 0.02;
+                objects[1]->theta += 0.02f;
                 updateRotationVector(objects[1]);
             }
             if(pressed_keys[ALLEGRO_KEY_R]){
-                objects[0]->theta += 0.02;
+                objects[0]->theta += 0.02f;
                 updateRotationVector(objects[0]);
             }
             if(pressed_keys[ALLEGRO_KEY_ESCAPE]){
@@ -164,12 +167,13 @@ int main(){
             }
 
             update_physics(objects, SOLID_OBJ_QUANT, width, height);
-            vector2d colisionPoint;
+
             if(detectColision(objects[0], objects[1], &colisionPoint)){
                 visibleObjects[1]->fillColor = colorMagenta;
             } else {
                 visibleObjects[1]->fillColor = colorCyan;
             }
+
 
             //
             //Draw all elements
@@ -178,6 +182,9 @@ int main(){
             for(int i = 0; i < SOLID_OBJ_QUANT; i++){
                 draw_object(visibleObjects[i]);
             }
+            #ifdef DEBUG_PHYSICS
+            al_draw_filled_circle(colisionPoint.x, colisionPoint.y, 3, colorRed);
+            #endif
             // UI Elements
             draw_ui(uiElements, UI_OBJ_QUANT);
 

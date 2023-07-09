@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <stdbool.h>
 
 typedef struct vector_2d{
     float x;
@@ -68,5 +69,6 @@ void vector2d_rotateInverse(vector2d* v, vector2d* r);
 void vector2d_rotateTheta(vector2d* v, float theta);
 void vector2d_rotateCenter(vector2d* v, vector2d* r, vector2d* c);
 void vector2d_rotateCenterInverse(vector2d* v, vector2d* r, vector2d* c);
+bool intersectionPoint(vector2d* aa, vector2d* ab, vector2d* ba, vector2d* bb, vector2d* v);
 
 #endif

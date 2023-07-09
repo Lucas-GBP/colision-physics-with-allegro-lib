@@ -170,3 +170,27 @@ void vector2d_rotateCenterInverse(vector2d* v, vector2d* r, vector2d* c){
     vector2d_rotateInverse(v, r);
     vector_2d_add(v, c);
 }
+
+bool intersectionPoint(vector2d* aa, vector2d* ab, vector2d* ba, vector2d* bb, vector2d* v){
+    const vector2d a = {
+        .x = (aa->x - ab->x),
+        .y = (aa->y - ab->y)
+    };
+    const vector2d b = {
+        .x = (ba->x - bb->x),
+        .y = (ba->y - bb->y)
+    };
+    const float k = ( a.x*b.y - a.y*b.x );
+
+    if(k == 0.0f){
+        return false;
+    }
+    const float c = 1/( a.x*b.y - a.y*b.x );
+    const float d = (aa->x*ab->y - aa->y*ab->x);
+    const float e = (ba->x*bb->y - ba->y*bb->x);
+
+    v->x = c*(d*b.x - e*a.x);
+    v->y = c*(d*b.y - e*a.y);
+
+    return true;
+}

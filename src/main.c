@@ -51,7 +51,7 @@ int main(){
             0, 0,
             1,
             0, 0,
-            Circle,
+            Rectangle,
             50,
             10, 10     
         )
@@ -63,6 +63,10 @@ int main(){
     vector2d colisionPoint = {
         .x = (float)width/2,
         .y = (float)height/2
+    };
+    vector2d vector_a = {
+        .x = 10,
+        .y = 210,
     };
 
     // Alocating Ui Elements

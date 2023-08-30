@@ -85,6 +85,7 @@ bool detectColision(solidObject* a, solidObject* b, vector2d* colisionPoint){
     return false;
 }
 
+//TODO: Colision Point
 bool detectColision_CircleCircle(solidObject* a, solidObject* b, vector2d* colisionPoint){
     if(vector2d_distance(&a->position, &b->position) <= a->circle.radius+b->circle.radius){
         colisionPoint->x = (a->position.x + b->position.x)/2;
@@ -95,16 +96,21 @@ bool detectColision_CircleCircle(solidObject* a, solidObject* b, vector2d* colis
 	return false;
 }
 
-//TODO everything
+//TODO: Colision Point
 bool detectColision_RectangleRectangle(solidObject* a, solidObject* b, vector2d* colisionPoint){
     vector2d bPost = b->position;
     vector2d bRot = b->rotation;
     vector2d_rotateCenterInverse(&bPost, &a->rotation, &a->position);
     vector2d_rotateInverse(&bRot, &a->rotation);
     
-    float bigScale = (fabsf(bRot.x) + fabsf(bRot.y));
-    float bigWidth_2 = b->rectangle.width_2*bigScale;
-    float bigHeight_2 = b->rectangle.height_2*bigScale;
+    const float bigScale = (fabsf(bRot.x) + fabsf(bRot.y));
+    const float bigWidth_2 = b->rectangle.width_2*bigScale;
+    const float bigHeight_2 = b->rectangle.height_2*bigScale;
+
+    const float aLeft = a->position.x - a->rectangle.width_2;
+    const float aRight = a->position.x + a->rectangle.width_2;
+    const float aUp = a->position.y - a->rectangle.height_2;
+    const float aDown = a->position.y + a->rectangle.height_2;
 
     #ifdef DEBUG_PHYSICS
     al_draw_rectangle(
@@ -133,16 +139,78 @@ bool detectColision_RectangleRectangle(solidObject* a, solidObject* b, vector2d*
     draw_rectangle(&obj);
     #endif
 
-    if(!(   //First collision detection Big B object
-        a->position.x-a->rectangle.width_2 <= bPost.x + bigWidth_2 &&
-        a->position.x+a->rectangle.width_2 >= bPost.x - bigWidth_2 &&
-        a->position.y-a->rectangle.height_2 <= bPost.y + bigHeight_2 &&
-        a->position.y+a->rectangle.height_2 >= bPost.y - bigHeight_2
-    )){
+    if( //First collision detection Big B object
+        aLeft > bPost.x + bigWidth_2 ||
+        aRight < bPost.x - bigWidth_2 ||
+        aUp > bPost.y + bigHeight_2 ||
+        aDown < bPost.y - bigHeight_2
+    ){
         return false;
     }
 
-    return true;
+    vector2d bArestas[4] = {
+        {
+            .x = bPost.x - b->rectangle.width_2,
+            .y = bPost.y - b->rectangle.height_2,
+        },
+        {
+            .x = bPost.x + b->rectangle.width_2,
+            .y = bPost.y - b->rectangle.height_2,
+        },
+        {
+            .x = bPost.x - b->rectangle.width_2,
+            .y = bPost.y + b->rectangle.height_2,
+        },
+        {
+            .x = bPost.x + b->rectangle.width_2,
+            .y = bPost.y + b->rectangle.height_2,
+        }
+    };
+
+    for(int i = 0; i < 4; i++){
+        vector2d_rotateCenter(&bArestas[i], &bRot, &bPost);
+        if(
+            bArestas[i].x >= aLeft && bArestas[i].x <= aRight &&
+            bArestas[i].y >= aUp && bArestas[i].y <= aDown
+        ){
+            return true;
+        }
+    }
+
+    vector2d aArrestas[] = {
+        {
+            .x = a->position.x - a->rectangle.width_2,
+            .y = a->position.y - a->rectangle.width_2
+        },
+        {
+            .x = a->position.x + a->rectangle.width_2,
+            .y = a->position.y - a->rectangle.width_2
+        },
+        {
+            .x = a->position.x - a->rectangle.width_2,
+            .y = a->position.y + a->rectangle.width_2
+        },
+        {
+            .x = a->position.x + a->rectangle.width_2,
+         
+            .y = a->position.y + a->rectangle.width_2
+        }
+    };
+    for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
+            if(intersectionPoint(&aArrestas[i], &aArrestas[i+1], &bArestas[j], &bArestas[j+1], colisionPoint)){
+                return true;
+            }
+        }
+        if(intersectionPoint(&aArrestas[i], &aArrestas[i+1], &bArestas[0], &bArestas[3], colisionPoint)){
+            return true;
+        }
+    }
+    if(intersectionPoint(&aArrestas[0], &aArrestas[3], &bArestas[0], &bArestas[3], colisionPoint)){
+        return true;
+    }
+
+    return false;
 }
 
 bool detectColision_RectangleCircle(solidObject* r, solidObject* c, vector2d* colisionPoint){

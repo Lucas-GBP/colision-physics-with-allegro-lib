@@ -171,26 +171,30 @@ void vector2d_rotateCenterInverse(vector2d* v, vector2d* r, vector2d* c){
     vector_2d_add(v, c);
 }
 
-bool intersectionPoint(vector2d* aa, vector2d* ab, vector2d* ba, vector2d* bb, vector2d* v){
-    const vector2d a = {
-        .x = (aa->x - ab->x),
-        .y = (aa->y - ab->y)
-    };
-    const vector2d b = {
-        .x = (ba->x - bb->x),
-        .y = (ba->y - bb->y)
-    };
-    const float k = ( a.x*b.y - a.y*b.x );
-
-    if(k == 0.0f){
+bool intersectionPoint(vector2d* a, vector2d* b, vector2d* c, vector2d* d, vector2d* v){
+    vector2d G = *a;
+    vector2d H = *d;
+    vector2d J = *c;
+    vector_2d_sub(&H, c); // d-c
+    if(H.x == 0){
         return false;
     }
-    const float c = 1/( a.x*b.y - a.y*b.x );
-    const float d = (aa->x*ab->y - aa->y*ab->x);
-    const float e = (ba->x*bb->y - ba->y*bb->x);
+    vector_2d_sub(&G, b); // a-b
+    vector_2d_sub(&J, a); // c-a
+    
+    const float l = (H.x*G.y+(J.x-G.x)*H.y);
+    if(l == 0){
+        return false;
+    }
+    const float s = -(H.x*J.y)/l;
+    const float t = -(s*G.x-J.x)/H.x;
 
-    v->x = c*(d*b.x - e*a.x);
-    v->y = c*(d*b.y - e*a.y);
+    if(0 > s || s > 1 || 0 > t || t > 1){
+        return false;
+    }
+
+    v->x = a->x + s*(b->x-a->x);
+    v->y = a->y + s*(b->y-a->y);
 
     return true;
 }
